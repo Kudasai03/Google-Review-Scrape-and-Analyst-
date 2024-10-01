@@ -1,7 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -43,16 +41,16 @@ def expand_reviews(driver):
 
 # Hàm lưu dữ liệu vào file CSV
 def save(df):
-    # Kiểm tra nếu file CSV đã tồn tại thì đọc nội dung cũ, nếu không thì tạo mới
-    file_exists = os.path.isfile('reviews2.csv')
-    existing_df = pd.read_csv('reviews2.csv') if file_exists else pd.DataFrame(columns=['Review Name', 'Review Text', 'Review Time', 'Rating'])
+    file_exists = os.path.isfile('datareview.csv')
+    existing_df = pd.read_csv('datareview.csv') if file_exists else pd.DataFrame(columns=['Review Name', 'Review Text', 'Review Time', 'Rating'])
     combined_df = pd.concat([existing_df, df], ignore_index=True)
-    combined_df.to_csv('reviews2.csv', index=False)
+    combined_df.to_csv('datareview.csv', index=False)
 
+user_input = input("Nhập các URL, ngăn cách bởi chữ 'and': ")
+urls = [url.strip() for url in user_input.split("and")]  # Chuyển chuỗi đầu vào thành danh sách các URL
 driver = webdriver.Chrome()
-urls = [
-    'https://www.google.com/maps/place/B%E1%BA%A3o+Hi%E1%BB%83m+Manulife/@10.7713548,106.6706353,15z/data=!4m12!1m2!2m1!1smanulife!3m8!1s0x317528d318cfb18b:0xba954bd27cb9e831!8m2!3d10.7811083!4d106.6970667!9m1!1b1!15sCghtYW51bGlmZSIDiAEBWgoiCG1hbnVsaWZlkgERaW5zdXJhbmNlX2NvbXBhbnngAQA!16s%2Fg%2F11c38t5mw5!5m2!1e4!1e1?hl=vi&entry=ttu&g_ep=EgoyMDI0MDkyNS4wIKXMDSoASAFQAw%3D%3D',
-]
+
+# urls = ['https://www.google.com/maps/place/FPT+Telecom/@10.771313,106.6706782,15z/data=!4m10!1m2!2m1!1sfpt+telecom!3m6!1s0x31752f694ed35d8d:0x4c3b2871bd2a5ec4!8m2!3d10.771313!4d106.6881877!15sCgtmcHQgdGVsZWNvbSIDiAEBkgEbYnVzaW5lc3NfbmV0d29ya2luZ19jb21wYW554AEA!16s%2Fg%2F1tdznmp1?hl=vi&entry=ttu&g_ep=EgoyMDI0MDkyNS4wIKXMDSoASAFQAw%3D%3D']
 
 final_df = pd.DataFrame()  
 for c, url in enumerate(urls):
@@ -66,24 +64,6 @@ for c, url in enumerate(urls):
         print(f"Error clicking on reviews: {e}")
     time.sleep(3)
 
-    # # Cuộn trang để tải thêm các đánh giá
-    # SCROLL_PAUSE_TIME = 8
-    # last_height = driver.execute_script("return document.evaluate('//*[@id=\"QA0Szd\"]/div/div/div[1]/div[3]/div/div[1]/div/div/div[3]/div[12]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.scrollHeight;")
-    # scroll_attempts = 0
-
-    # while scroll_attempts < 200: 
-    #     # Cuộn đến phần tử cụ thể
-    #     element_to_scroll = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[3]/div/div[1]')
-    #     driver.execute_script("arguments[0].scrollIntoView(true);", element_to_scroll)
-    #     time.sleep(SCROLL_PAUSE_TIME)
-    #     new_height = driver.execute_script("return document.evaluate('//*[@id=\"QA0Szd\"]/div/div/div[1]/div[3]/div/div[1]/div/div/div[3]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.scrollHeight;")
-    #     if new_height == last_height:
-    #         break
-    #     last_height = new_height
-    #     scroll_attempts += 1
-
-    # expand_reviews(driver)
-    # Cuộn trang để tải thêm các đánh giá
     SCROLL_PAUSE_TIME = 5
     # Tìm phần tử cụ thể mà bạn muốn cuộn đến
     scrollable_div = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[3]/div/div[1]/div/div/div[3]')
@@ -91,8 +71,7 @@ for c, url in enumerate(urls):
     # Lấy chiều cao hiện tại của phần tử
     last_height = driver.execute_script("return arguments[0].scrollHeight;", scrollable_div)
 
-    while True:  # Cuộn vô thời hạn
-        # Cuộn đến phần tử cụ thể
+    while True: 
         driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", scrollable_div)
         time.sleep(SCROLL_PAUSE_TIME)
 
